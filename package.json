@@ -1,0 +1,25 @@
+{
+  "name": "@poromosiyo/db",
+  "version": "0.0.1",
+  "description": "Poromosiyo database package, schema owner, and migration boundary.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": "20.20.x",
+    "npm": "10.8.x"
+  },
+  "private": true,
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "20.20.x"
+    }
+  }
+}
