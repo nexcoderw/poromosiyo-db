@@ -28,9 +28,7 @@ async function main(): Promise<void> {
     const database = rows[0];
 
     if (!database?.databaseName) {
-      throw new Error(
-        'Connected to MySQL but no database is selected.',
-      );
+      throw new Error('Connected to MySQL but no database is selected.');
     }
 
     console.log('Poromosiyo database connection successful.');

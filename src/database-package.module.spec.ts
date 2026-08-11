@@ -7,22 +7,20 @@ import { PrismaModule } from './prisma/prisma.module';
 
 describe('DatabasePackageModule', () => {
   it('imports the Prisma module', () => {
-    const imports =
-      Reflect.getMetadata(
-        MODULE_METADATA.IMPORTS,
-        DatabasePackageModule,
-      ) ?? [];
+    const imports: unknown = Reflect.getMetadata(
+      MODULE_METADATA.IMPORTS,
+      DatabasePackageModule,
+    );
 
-    expect(imports).toContain(PrismaModule);
+    expect(imports).toEqual(expect.arrayContaining([PrismaModule]));
   });
 
   it('exports the Prisma module', () => {
-    const exports =
-      Reflect.getMetadata(
-        MODULE_METADATA.EXPORTS,
-        DatabasePackageModule,
-      ) ?? [];
+    const exports: unknown = Reflect.getMetadata(
+      MODULE_METADATA.EXPORTS,
+      DatabasePackageModule,
+    );
 
-    expect(exports).toContain(PrismaModule);
+    expect(exports).toEqual(expect.arrayContaining([PrismaModule]));
   });
 });

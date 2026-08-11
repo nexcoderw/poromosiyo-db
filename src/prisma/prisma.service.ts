@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 import { PrismaClient } from '../generated/prisma/client';
@@ -26,9 +22,7 @@ export class PrismaService
     }
 
     super({
-      adapter: new PrismaMariaDb(
-        createMariaDbAdapterConfig(databaseUrl),
-      ),
+      adapter: new PrismaMariaDb(createMariaDbAdapterConfig(databaseUrl)),
     });
   }
 
@@ -62,14 +56,10 @@ function createMariaDbAdapterConfig(
     );
   }
 
-  const database = decodeURIComponent(
-    url.pathname.replace(/^\/+/, ''),
-  );
+  const database = decodeURIComponent(url.pathname.replace(/^\/+/, ''));
 
   if (!database) {
-    throw new Error(
-      'DATABASE_URL must include a database name.',
-    );
+    throw new Error('DATABASE_URL must include a database name.');
   }
 
   const connectionLimit = getConnectionLimit();
@@ -89,9 +79,7 @@ function getConnectionLimit(): number {
   const value = Number.parseInt(raw, 10);
 
   if (!Number.isInteger(value) || value < 1) {
-    throw new Error(
-      'DATABASE_CONNECTION_LIMIT must be a positive integer.',
-    );
+    throw new Error('DATABASE_CONNECTION_LIMIT must be a positive integer.');
   }
 
   return value;
