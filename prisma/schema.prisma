@@ -131,3 +131,94 @@ model PasswordResetToken {
   @@index([expiresAt], map: "password_reset_expires_at_idx")
   @@map("password_reset_tokens")
 }
+
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Category {
+  id          String    @id @default(uuid()) @db.Char(36)
+  parentId    String?   @map("parent_id") @db.Char(36)
+  name        String    @db.VarChar(120)
+  slug        String    @unique @db.VarChar(191)
+  description String?   @db.Text
+  image       String?   @db.VarChar(2048)
+  isActive    Boolean   @default(true) @map("is_active")
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@index([parentId, isActive, sortOrder], map: "categories_parent_active_sort_idx")
+  @@index([isActive, sortOrder], map: "categories_active_sort_idx")
+  @@map("categories")
+}
+
+model Brand {
+  id          String   @id @default(uuid()) @db.Char(36)
+  name        String   @db.VarChar(120)
+  slug        String   @unique @db.VarChar(191)
+  description String?  @db.Text
+  logo        String?  @db.VarChar(2048)
+  website     String?  @db.VarChar(2048)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
+
+  products Product[]
+
+  @@index([isActive, name], map: "brands_active_name_idx")
+  @@map("brands")
+}
+
+model Product {
+  id               String        @id @default(uuid()) @db.Char(36)
+  categoryId       String        @map("category_id") @db.Char(36)
+  brandId          String?       @map("brand_id") @db.Char(36)
+  name             String        @db.VarChar(255)
+  slug             String        @unique @db.VarChar(191)
+  sku              String        @unique @db.VarChar(64)
+  shortDescription String?       @map("short_description") @db.VarChar(500)
+  description      String?       @db.Text
+  currency         String        @default("RWF") @db.Char(3)
+  originalPrice    Decimal       @map("original_price") @db.Decimal(12, 2)
+  sellingPrice     Decimal       @map("selling_price") @db.Decimal(12, 2)
+  status           ProductStatus @default(DRAFT)
+  isFeatured       Boolean       @default(false) @map("is_featured")
+  publishedAt      DateTime?     @map("published_at") @db.DateTime(6)
+  createdAt        DateTime      @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt        DateTime      @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
+
+  category Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  brand    Brand?         @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  images   ProductImage[]
+
+  @@index([categoryId, status, createdAt], map: "products_category_status_created_idx")
+  @@index([brandId, status], map: "products_brand_status_idx")
+  @@index([status, publishedAt], map: "products_status_published_idx")
+  @@index([isFeatured, status], map: "products_featured_status_idx")
+  @@index([createdAt], map: "products_created_at_idx")
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid()) @db.Char(36)
+  productId String   @map("product_id") @db.Char(36)
+  url       String   @db.VarChar(2048)
+  altText   String?  @map("alt_text") @db.VarChar(255)
+  sortOrder Int      @default(0) @map("sort_order")
+  isPrimary Boolean  @default(false) @map("is_primary")
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(6)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder], map: "product_images_product_sort_idx")
+  @@index([productId, isPrimary], map: "product_images_product_primary_idx")
+  @@map("product_images")
+}
