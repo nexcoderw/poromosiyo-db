@@ -11,6 +11,7 @@ datasource db {
 enum UserRole {
   CUSTOMER
   ADMIN
+  SUPERADMIN
 }
 
 enum AuthProvider {
@@ -25,6 +26,9 @@ model User {
   passwordHash        String?   @map("password_hash") @db.VarChar(255)
   role                UserRole  @default(CUSTOMER)
   isActive            Boolean   @default(true) @map("is_active")
+  blockedAt           DateTime? @map("blocked_at") @db.DateTime(6)
+  blockedReason       String?   @map("blocked_reason") @db.VarChar(500)
+  blockedByUserId     String?   @map("blocked_by_user_id") @db.Char(36)
   emailVerifiedAt     DateTime? @map("email_verified_at") @db.DateTime(6)
   passwordChangedAt   DateTime? @map("password_changed_at") @db.DateTime(6)
   lastLoginAt         DateTime? @map("last_login_at") @db.DateTime(6)
@@ -37,10 +41,16 @@ model User {
   sessions                AuthSession[]
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens     PasswordResetToken[]
+  blockedBy               User?                    @relation("UserBlockActor", fields: [blockedByUserId], references: [id], onDelete: SetNull)
+  blockedUsers            User[]                   @relation("UserBlockActor")
+  activities              UserActivity[]           @relation("ActivitySubject")
+  performedActivities     UserActivity[]           @relation("ActivityActor")
 
   @@index([role, isActive], map: "users_role_active_idx")
   @@index([lockedUntil], map: "users_locked_until_idx")
   @@index([createdAt], map: "users_created_at_idx")
+  @@index([blockedAt], map: "users_blocked_at_idx")
+  @@index([blockedByUserId], map: "users_blocked_by_user_id_idx")
   @@map("users")
 }
 
@@ -130,6 +140,30 @@ model PasswordResetToken {
   @@index([userId, expiresAt], map: "password_reset_user_expires_idx")
   @@index([expiresAt], map: "password_reset_expires_at_idx")
   @@map("password_reset_tokens")
+}
+
+model UserActivity {
+  id            String   @id @default(uuid()) @db.Char(36)
+  subjectUserId String?  @map("subject_user_id") @db.Char(36)
+  actorUserId   String?  @map("actor_user_id") @db.Char(36)
+  action        String   @db.VarChar(100)
+  resourceType  String?  @map("resource_type") @db.VarChar(64)
+  resourceId    String?  @map("resource_id") @db.Char(36)
+  description   String?  @db.VarChar(500)
+  ipAddress     String?  @map("ip_address") @db.VarChar(45)
+  userAgent     String?  @map("user_agent") @db.VarChar(255)
+  metadata      Json?
+  createdAt     DateTime @default(now()) @map("created_at") @db.DateTime(6)
+
+  subjectUser User? @relation("ActivitySubject", fields: [subjectUserId], references: [id], onDelete: SetNull)
+  actorUser   User? @relation("ActivityActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([subjectUserId, createdAt], map: "user_activities_subject_created_idx")
+  @@index([actorUserId, createdAt], map: "user_activities_actor_created_idx")
+  @@index([action, createdAt], map: "user_activities_action_created_idx")
+  @@index([resourceType, resourceId, createdAt], map: "user_activities_resource_created_idx")
+  @@index([createdAt], map: "user_activities_created_at_idx")
+  @@map("user_activities")
 }
 
 enum ProductStatus {
