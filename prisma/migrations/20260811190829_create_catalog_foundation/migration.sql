@@ -89,3 +89,22 @@ ALTER TABLE `products` ADD CONSTRAINT `products_brand_id_fkey` FOREIGN KEY (`bra
 
 -- AddForeignKey
 ALTER TABLE `product_images` ADD CONSTRAINT `product_images_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddCheckConstraint
+ALTER TABLE `categories`
+  ADD CONSTRAINT `categories_sort_order_nonnegative_chk`
+  CHECK (`sort_order` >= 0);
+
+-- AddCheckConstraint
+ALTER TABLE `products`
+  ADD CONSTRAINT `products_original_price_positive_chk`
+  CHECK (`original_price` > 0),
+  ADD CONSTRAINT `products_selling_price_positive_chk`
+  CHECK (`selling_price` > 0),
+  ADD CONSTRAINT `products_discount_price_chk`
+  CHECK (`selling_price` < `original_price`);
+
+-- AddCheckConstraint
+ALTER TABLE `product_images`
+  ADD CONSTRAINT `product_images_sort_order_nonnegative_chk`
+  CHECK (`sort_order` >= 0);
