@@ -24,3 +24,12 @@ users
   |
   +-- password_reset_tokens
 ```
+
+
+## Google Identity Hardening
+
+Google identities are stored in:
+
+```text
+auth_accounts
+```
