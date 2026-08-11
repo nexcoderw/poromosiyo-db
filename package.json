@@ -10,16 +10,22 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "packageManager": "npm@10.8.2",
+  "packageManager": "npm@11.17.0",
   "engines": {
-    "node": "20.20.x",
-    "npm": "10.8.x"
+    "node": "24.19.x",
+    "npm": "11.17.x"
   },
   "private": true,
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": "20.20.x"
+      "version": "24.19.x",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "npm",
+      "version": "11.17.x",
+      "onFail": "error"
     }
   }
 }
