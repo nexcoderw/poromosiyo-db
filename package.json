@@ -1,14 +1,30 @@
 {
   "name": "@poromosiyo/db",
   "version": "0.0.1",
-  "description": "Poromosiyo database package, schema owner, and migration boundary.",
-  "main": "index.js",
+  "description": "Poromosiyo database package, Prisma schema owner, and migration boundary.",
+  "main": "./dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prisma:generate": "prisma generate --allow-no-models",
+    "prebuild": "npm run prisma:generate",
+    "build": "nest build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "format": "prettier --write \"src/**/*.ts\" \"prisma.config.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"prisma.config.ts\"",
+    "schema:format": "prisma format",
+    "schema:validate": "prisma validate",
+    "lint": "npm run lint:check",
+    "lint:check": "eslint \"src/**/*.ts\" prisma.config.ts",
+    "lint:fix": "eslint \"src/**/*.ts\" prisma.config.ts --fix",
+    "pretest": "npm run prisma:generate",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:ci": "jest --runInBand",
+    "ci:check": "npm run schema:validate && npm run prisma:generate && npm run lint && npm run typecheck && npm run test:ci && npm run build"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "type": "commonjs",
   "packageManager": "npm@11.17.0",
   "engines": {
@@ -27,5 +43,67 @@
       "version": "11.17.x",
       "onFail": "error"
     }
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./prisma/schema": "./prisma/schema.prisma"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "prisma/schema.prisma",
+    "README.md"
+  ],
+  "dependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/core": "^11.0.1",
+    "@prisma/adapter-mariadb": "7.9.1",
+    "@prisma/client": "7.9.1",
+    "mariadb": "^3.5.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/testing": "^11.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.0",
+    "dotenv": "^17.0.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-prettier": "^5.2.2",
+    "globals": "^17.0.0",
+    "jest": "^30.0.0",
+    "prettier": "^3.4.2",
+    "prisma": "7.9.1",
+    "ts-jest": "^29.2.5",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.ts",
+      "!generated/**"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
   }
 }
