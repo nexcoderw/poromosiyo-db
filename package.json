@@ -4,7 +4,7 @@
   "description": "Poromosiyo database package, Prisma schema owner, and migration boundary.",
   "main": "./dist/index.js",
   "scripts": {
-    "prisma:generate": "prisma generate --allow-no-models",
+    "prisma:generate": "prisma generate",
     "prebuild": "npm run prisma:generate",
     "build": "nest build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
