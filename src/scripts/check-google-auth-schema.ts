@@ -122,3 +122,15 @@ function assertUniqueIndex(
 
   throw new Error(`Missing unique constraint for ${description}.`);
 }
+
+main().catch((error: unknown) => {
+  console.error('Poromosiyo Google authentication schema verification failed.');
+
+  if (error instanceof Error) {
+    console.error(error.message);
+  } else {
+    console.error(String(error));
+  }
+
+  process.exitCode = 1;
+});
