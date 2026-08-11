@@ -43,62 +43,61 @@ const expectedTables = [
   'product_images',
 ] as const;
 
-const expectedColumns:
-  Record<string, readonly string[]> = {
-    categories: [
-      'id',
-      'parent_id',
-      'name',
-      'slug',
-      'description',
-      'image',
-      'is_active',
-      'sort_order',
-      'created_at',
-      'updated_at',
-    ],
+const expectedColumns: Record<string, readonly string[]> = {
+  categories: [
+    'id',
+    'parent_id',
+    'name',
+    'slug',
+    'description',
+    'image',
+    'is_active',
+    'sort_order',
+    'created_at',
+    'updated_at',
+  ],
 
-    brands: [
-      'id',
-      'name',
-      'slug',
-      'description',
-      'logo',
-      'website',
-      'is_active',
-      'created_at',
-      'updated_at',
-    ],
+  brands: [
+    'id',
+    'name',
+    'slug',
+    'description',
+    'logo',
+    'website',
+    'is_active',
+    'created_at',
+    'updated_at',
+  ],
 
-    products: [
-      'id',
-      'category_id',
-      'brand_id',
-      'name',
-      'slug',
-      'sku',
-      'short_description',
-      'description',
-      'currency',
-      'original_price',
-      'selling_price',
-      'status',
-      'is_featured',
-      'published_at',
-      'created_at',
-      'updated_at',
-    ],
+  products: [
+    'id',
+    'category_id',
+    'brand_id',
+    'name',
+    'slug',
+    'sku',
+    'short_description',
+    'description',
+    'currency',
+    'original_price',
+    'selling_price',
+    'status',
+    'is_featured',
+    'published_at',
+    'created_at',
+    'updated_at',
+  ],
 
-    product_images: [
-      'id',
-      'product_id',
-      'url',
-      'alt_text',
-      'sort_order',
-      'is_primary',
-      'created_at',
-    ],
-  };
+  product_images: [
+    'id',
+    'product_id',
+    'url',
+    'alt_text',
+    'sort_order',
+    'is_primary',
+    'created_at',
+  ],
+};
 
 const expectedUniqueColumns = [
   ['categories', 'slug'],
@@ -108,26 +107,10 @@ const expectedUniqueColumns = [
 ] as const;
 
 const expectedForeignKeys = [
-  [
-    'categories',
-    'parent_id',
-    'RESTRICT',
-  ],
-  [
-    'products',
-    'category_id',
-    'RESTRICT',
-  ],
-  [
-    'products',
-    'brand_id',
-    'SET NULL',
-  ],
-  [
-    'product_images',
-    'product_id',
-    'CASCADE',
-  ],
+  ['categories', 'parent_id', 'RESTRICT'],
+  ['products', 'category_id', 'RESTRICT'],
+  ['products', 'brand_id', 'SET NULL'],
+  ['product_images', 'product_id', 'CASCADE'],
 ] as const;
 
 const expectedCheckConstraints = [
@@ -139,47 +122,27 @@ const expectedCheckConstraints = [
 ] as const;
 
 async function main(): Promise<void> {
-  process.env.DATABASE_CONNECT_ON_INIT =
-    'false';
+  process.env.DATABASE_CONNECT_ON_INIT = 'false';
 
-  const prisma =
-    new PrismaService();
+  const prisma = new PrismaService();
 
   try {
     await prisma.$connect();
 
-    const tables =
-      await prisma.$queryRaw<
-        TableRow[]
-      >`
+    const tables = await prisma.$queryRaw<TableRow[]>`
         SELECT
           TABLE_NAME AS tableName
         FROM information_schema.TABLES
         WHERE TABLE_SCHEMA = DATABASE()
       `;
 
-    const tableNames =
-      new Set(
-        tables.map(
-          (row) =>
-            row.tableName,
-        ),
-      );
+    const tableNames = new Set(tables.map((row) => row.tableName));
 
-    for (
-      const table
-      of expectedTables
-    ) {
-      assert(
-        tableNames.has(table),
-        `Missing catalog table: ${table}`,
-      );
+    for (const table of expectedTables) {
+      assert(tableNames.has(table), `Missing catalog table: ${table}`);
     }
 
-    const columns =
-      await prisma.$queryRaw<
-        ColumnRow[]
-      >`
+    const columns = await prisma.$queryRaw<ColumnRow[]>`
         SELECT
           TABLE_NAME AS tableName,
           COLUMN_NAME AS columnName
@@ -187,40 +150,20 @@ async function main(): Promise<void> {
         WHERE TABLE_SCHEMA = DATABASE()
       `;
 
-    const columnKeys =
-      new Set(
-        columns.map(
-          (row) =>
-            `${row.tableName}.${row.columnName}`,
-        ),
-      );
+    const columnKeys = new Set(
+      columns.map((row) => `${row.tableName}.${row.columnName}`),
+    );
 
-    for (
-      const [
-        table,
-        tableColumns,
-      ]
-      of Object.entries(
-        expectedColumns,
-      )
-    ) {
-      for (
-        const column
-        of tableColumns
-      ) {
+    for (const [table, tableColumns] of Object.entries(expectedColumns)) {
+      for (const column of tableColumns) {
         assert(
-          columnKeys.has(
-            `${table}.${column}`,
-          ),
+          columnKeys.has(`${table}.${column}`),
           `Missing catalog column: ${table}.${column}`,
         );
       }
     }
 
-    const decimalColumns =
-      await prisma.$queryRaw<
-        DecimalColumnRow[]
-      >`
+    const decimalColumns = await prisma.$queryRaw<DecimalColumnRow[]>`
         SELECT
           COLUMN_NAME AS columnName,
           NUMERIC_PRECISION AS numericPrecision,
@@ -235,44 +178,23 @@ async function main(): Promise<void> {
           )
       `;
 
-    for (
-      const column
-      of [
-        'original_price',
-        'selling_price',
-      ]
-    ) {
-      const result =
-        decimalColumns.find(
-          (row) =>
-            row.columnName ===
-            column,
-        );
+    for (const column of ['original_price', 'selling_price']) {
+      const result = decimalColumns.find((row) => row.columnName === column);
+
+      assert(result !== undefined, `Missing product price column: ${column}`);
 
       assert(
-        result !== undefined,
-        `Missing product price column: ${column}`,
-      );
-
-      assert(
-        Number(
-          result.numericPrecision,
-        ) === 12,
+        Number(result.numericPrecision) === 12,
         `${column} must use DECIMAL(12,2).`,
       );
 
       assert(
-        Number(
-          result.numericScale,
-        ) === 2,
+        Number(result.numericScale) === 2,
         `${column} must use DECIMAL(12,2).`,
       );
     }
 
-    const indexes =
-      await prisma.$queryRaw<
-        IndexRow[]
-      >`
+    const indexes = await prisma.$queryRaw<IndexRow[]>`
         SELECT
           TABLE_NAME AS tableName,
           INDEX_NAME AS indexName,
@@ -287,35 +209,18 @@ async function main(): Promise<void> {
           SEQ_IN_INDEX
       `;
 
-    for (
-      const [
-        table,
-        column,
-      ]
-      of expectedUniqueColumns
-    ) {
-      const unique =
-        indexes.some(
-          (row) =>
-            row.tableName ===
-              table &&
-            row.columnName ===
-              column &&
-            Number(
-              row.nonUnique,
-            ) === 0,
-        );
-
-      assert(
-        unique,
-        `Missing catalog unique constraint: ${table}.${column}`,
+    for (const [table, column] of expectedUniqueColumns) {
+      const unique = indexes.some(
+        (row) =>
+          row.tableName === table &&
+          row.columnName === column &&
+          Number(row.nonUnique) === 0,
       );
+
+      assert(unique, `Missing catalog unique constraint: ${table}.${column}`);
     }
 
-    const foreignKeys =
-      await prisma.$queryRaw<
-        ForeignKeyRow[]
-      >`
+    const foreignKeys = await prisma.$queryRaw<ForeignKeyRow[]>`
         SELECT
           kcu.TABLE_NAME AS tableName,
           kcu.COLUMN_NAME AS columnName,
@@ -335,35 +240,18 @@ async function main(): Promise<void> {
             IS NOT NULL
       `;
 
-    for (
-      const [
-        table,
-        column,
-        deleteRule,
-      ]
-      of expectedForeignKeys
-    ) {
-      const found =
-        foreignKeys.some(
-          (row) =>
-            row.tableName ===
-              table &&
-            row.columnName ===
-              column &&
-            row.deleteRule ===
-              deleteRule,
-        );
-
-      assert(
-        found,
-        `Expected ${deleteRule} for ${table}.${column}`,
+    for (const [table, column, deleteRule] of expectedForeignKeys) {
+      const found = foreignKeys.some(
+        (row) =>
+          row.tableName === table &&
+          row.columnName === column &&
+          row.deleteRule === deleteRule,
       );
+
+      assert(found, `Expected ${deleteRule} for ${table}.${column}`);
     }
 
-    const checks =
-      await prisma.$queryRaw<
-        CheckConstraintRow[]
-      >`
+    const checks = await prisma.$queryRaw<CheckConstraintRow[]>`
         SELECT
           CONSTRAINT_NAME AS constraintName,
           CHECK_CLAUSE AS checkClause
@@ -377,87 +265,47 @@ async function main(): Promise<void> {
           )
       `;
 
-    const checkNames =
-      new Set(
-        checks.map(
-          (row) =>
-            row.constraintName,
-        ),
-      );
+    const checkNames = new Set(checks.map((row) => row.constraintName));
 
-    for (
-      const constraint
-      of expectedCheckConstraints
-    ) {
+    for (const constraint of expectedCheckConstraints) {
       assert(
-        checkNames.has(
-          constraint,
-        ),
+        checkNames.has(constraint),
         `Missing catalog check constraint: ${constraint}`,
       );
     }
 
-    console.log(
-      'Poromosiyo catalog schema verification successful.',
-    );
+    console.log('Poromosiyo catalog schema verification successful.');
 
-    for (
-      const table
-      of expectedTables
-    ) {
-      console.log(
-        `Verified table: ${table}`,
-      );
+    for (const table of expectedTables) {
+      console.log(`Verified table: ${table}`);
     }
 
-    console.log(
-      'Verified DECIMAL(12,2) product prices.',
-    );
+    console.log('Verified DECIMAL(12,2) product prices.');
 
-    console.log(
-      'Verified catalog unique constraints.',
-    );
+    console.log('Verified catalog unique constraints.');
 
-    console.log(
-      'Verified catalog foreign-key deletion rules.',
-    );
+    console.log('Verified catalog foreign-key deletion rules.');
 
-    console.log(
-      'Verified discounted-product database constraints.',
-    );
+    console.log('Verified discounted-product database constraints.');
   } finally {
     await prisma.$disconnect();
   }
 }
 
-function assert(
-  condition: boolean,
-  message: string,
-): asserts condition {
+function assert(condition: boolean, message: string): asserts condition {
   if (!condition) {
     throw new Error(message);
   }
 }
 
-main().catch(
-  (error: unknown) => {
-    console.error(
-      'Poromosiyo catalog schema verification failed.',
-    );
+main().catch((error: unknown) => {
+  console.error('Poromosiyo catalog schema verification failed.');
 
-    if (
-      error instanceof
-      Error
-    ) {
-      console.error(
-        error.message,
-      );
-    } else {
-      console.error(
-        String(error),
-      );
-    }
+  if (error instanceof Error) {
+    console.error(error.message);
+  } else {
+    console.error(String(error));
+  }
 
-    process.exitCode = 1;
-  },
-);
+  process.exitCode = 1;
+});
