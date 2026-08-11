@@ -29,7 +29,9 @@
     "db:auth-check": "npm run prisma:generate && ts-node src/scripts/check-auth-schema.ts",
     "milestone:5:check": "npm run ci:check && npm run migrate:status && npm run db:check && npm run db:auth-check",
     "db:google-auth-check": "npm run prisma:generate && ts-node src/scripts/check-google-auth-schema.ts",
-    "milestone:10:check": "npm run ci:check && npm run migrate:status && npm run db:check && npm run db:auth-check && npm run db:google-auth-check"
+    "milestone:10:check": "npm run ci:check && npm run migrate:status && npm run db:check && npm run db:auth-check && npm run db:google-auth-check",
+    "db:catalog-check": "npm run prisma:generate && ts-node src/scripts/check-catalog-schema.ts",
+    "milestone:12:check": "npm run milestone:10:check && npm run db:catalog-check"
   },
   "keywords": [],
   "author": "",
