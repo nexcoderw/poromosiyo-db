@@ -243,6 +243,7 @@ model Product {
   status           ProductStatus @default(DRAFT)
   isFeatured       Boolean       @default(false) @map("is_featured")
   publishedAt      DateTime?     @map("published_at") @db.DateTime(6)
+  expiresAt        DateTime      @map("expires_at") @db.DateTime(6)
   createdAt        DateTime      @default(now()) @map("created_at") @db.DateTime(6)
   updatedAt        DateTime      @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
 
@@ -255,6 +256,7 @@ model Product {
   @@index([categoryId, status, createdAt], map: "products_category_status_created_idx")
   @@index([brandId, status], map: "products_brand_status_idx")
   @@index([status, publishedAt], map: "products_status_published_idx")
+  @@index([status, expiresAt], map: "products_status_expires_idx")
   @@index([isFeatured, status], map: "products_featured_status_idx")
   @@index([createdAt], map: "products_created_at_idx")
   @@map("products")
