@@ -33,7 +33,8 @@
     "db:catalog-check": "npm run prisma:generate && ts-node src/scripts/check-catalog-schema.ts",
     "milestone:12:check": "npm run milestone:10:check && npm run db:catalog-check",
     "db:governance-check": "npm run prisma:generate && ts-node src/scripts/check-admin-governance-schema.ts",
-    "milestone:14:check": "npm run ci:check && npm run migrate:status && npm run db:check && npm run db:auth-check && npm run db:google-auth-check && npm run db:catalog-check && npm run db:governance-check"
+    "milestone:14:check": "npm run ci:check && npm run migrate:status && npm run db:check && npm run db:auth-check && npm run db:google-auth-check && npm run db:catalog-check && npm run db:governance-check",
+    "milestone:19:check": "npm run milestone:14:check"
   },
   "keywords": [],
   "author": "",
