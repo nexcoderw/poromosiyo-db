@@ -9,6 +9,7 @@ type TableRow = {
 type ColumnRow = {
   tableName: string;
   columnName: string;
+  isNullable: string;
 };
 
 type DecimalColumnRow = {
@@ -39,6 +40,7 @@ type CheckConstraintRow = {
 const expectedTables = [
   'categories',
   'brands',
+  'stores',
   'products',
   'product_images',
 ] as const;
@@ -69,8 +71,21 @@ const expectedColumns: Record<string, readonly string[]> = {
     'updated_at',
   ],
 
+  stores: [
+    'id',
+    'name',
+    'slug',
+    'description',
+    'logo',
+    'website',
+    'is_active',
+    'created_at',
+    'updated_at',
+  ],
+
   products: [
     'id',
+    'store_id',
     'category_id',
     'brand_id',
     'name',
@@ -102,12 +117,14 @@ const expectedColumns: Record<string, readonly string[]> = {
 const expectedUniqueColumns = [
   ['categories', 'slug'],
   ['brands', 'slug'],
+  ['stores', 'slug'],
   ['products', 'slug'],
   ['products', 'sku'],
 ] as const;
 
 const expectedForeignKeys = [
   ['categories', 'parent_id', 'RESTRICT'],
+  ['products', 'store_id', 'RESTRICT'],
   ['products', 'category_id', 'RESTRICT'],
   ['products', 'brand_id', 'SET NULL'],
   ['product_images', 'product_id', 'CASCADE'],
@@ -145,7 +162,8 @@ async function main(): Promise<void> {
     const columns = await prisma.$queryRaw<ColumnRow[]>`
         SELECT
           TABLE_NAME AS tableName,
-          COLUMN_NAME AS columnName
+          COLUMN_NAME AS columnName,
+          IS_NULLABLE AS isNullable
         FROM information_schema.COLUMNS
         WHERE TABLE_SCHEMA = DATABASE()
       `;
@@ -162,6 +180,15 @@ async function main(): Promise<void> {
         );
       }
     }
+
+    const productStoreId = columns.find(
+      (row) => row.tableName === 'products' && row.columnName === 'store_id',
+    );
+
+    assert(
+      productStoreId?.isNullable === 'NO',
+      'products.store_id must be required.',
+    );
 
     const decimalColumns = await prisma.$queryRaw<DecimalColumnRow[]>`
         SELECT
@@ -285,6 +312,8 @@ async function main(): Promise<void> {
     console.log('Verified catalog unique constraints.');
 
     console.log('Verified catalog foreign-key deletion rules.');
+
+    console.log('Verified required product Store ownership.');
 
     console.log('Verified discounted-product database constraints.');
   } finally {
